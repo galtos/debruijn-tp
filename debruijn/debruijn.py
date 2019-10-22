@@ -1,5 +1,7 @@
 import os
 import argparse
+import statistics
+import random
 import networkx as nx
 
 def read_fastq(path_fastq):
@@ -49,8 +51,11 @@ def get_starting_nodes(G):
             start_nodes.append(k_mer)
     return start_nodes
 
-def std():
-    pass
+def std(list_value):
+    """
+    compute the standard deviation
+    """
+    return statistics.stdev(list_value)
 
 
 def get_sink_nodes(G):
@@ -61,12 +66,34 @@ def get_sink_nodes(G):
     return end_nodes
 
 
-def path_average_weight():
-    pass
+def path_average_weight(G, chemin):
+    tot_weight = []
+    list_chemin = list(chemin)
+    print(list_chemin)
+    for i in range(0,len(list_chemin)-1):
+        node_1 = list_chemin[i]
+        node_2 = list_chemin[i+1]
+        tot_weight.append(G[node_1][node_2]["weight"])
+    return sum(tot_weight)/len(tot_weight)
 
 
-def remove_paths():
-    pass
+def remove_paths(graph, list_chemin, delete_entry_node, delete_sink_node):
+    list_chemin = list(list_chemin)
+    list_path_clean = []
+    if delete_entry_node == True:
+        start_nodes = list(get_starting_nodes(graph))
+        for chemin in list_chemin:
+            for node in chemin:
+                if node in start_nodes:
+                    graph.remove_node(node)
+                
+    if delete_sink_node == True:
+        end_nodes = list(get_sink_nodes(graph))
+        for chemin in list_chemin:
+            for node in chemin:
+                if node in end_nodes:
+                    graph.remove_node(node)
+    return graph
 
 
 def select_best_path():
@@ -134,11 +161,29 @@ def main():
 
     args = parser.parse_args()
     
+    random.seed(9001)
+    
     dict_k_mer = build_kmer_dict(args.i, int(args.k))
     G = build_graph(dict_k_mer)
     sart_nodes = get_starting_nodes(G)
     end_nodes = get_sink_nodes(G)
     contigs = get_contigs(G, sart_nodes, end_nodes)
     save_contigs(contigs, "test.txt")
+    #path_average_weight(G,)
+    
+    graph_1 = nx.DiGraph()
+    graph_2 = nx.DiGraph()
+    graph_3 = nx.DiGraph()
+    graph_4 = nx.DiGraph()
+    graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+    graph_2.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+    graph_3.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+    graph_4.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+    graph_1 = remove_paths(graph_1, [(1,2)], True, False)
+    graph_2 = remove_paths(graph_2, [(5,7)], False, True)
+    graph_3 = remove_paths(graph_3, [(2,4,5)], False, False)
+    graph_4 = remove_paths(graph_4, [(2,4,5)], True, True)
+
+
 if __name__ == "__main__":
     main()
