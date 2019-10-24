@@ -190,8 +190,22 @@ def solve_bubble(graph, node_ancestor, node_descendant):
 
 
 def simplify_bubbles(graph):
-    all_path = list(nx.all_simple_paths(graph))
-    print(all_path)
+    print(graph.nodes)
+    for node_1 in graph.nodes:
+        nodes_ancestor = list(nx.ancestors(graph, node_1))
+        if len(nodes_ancestor) > 1:
+            for i in range(len(nodes_ancestor)-1):
+                for j in range(i+1, len(nodes_ancestor)):
+                    path = nx.lowest_common_ancestor(graph, nodes_ancestor[i], nodes_ancestor[j])
+                    if path != nodes_ancestor[i] and path != nodes_ancestor[j]:
+                        print("yes")
+                        graph = solve_bubble(graph, node_1, path)
+                        print(path)
+        #path = list(nx.lowest_common_ancestor(graph, node_1, node_2))
+        print(nodes_ancestor)
+    
+    #lowest common ancestor
+    #lowest_common_ancestor()
     return graph
 
 
