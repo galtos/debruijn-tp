@@ -212,26 +212,36 @@ def simplify_bubbles(graph):
 def solve_entry_tips(graph, node_entry):
     main_path = []
     pointe = []
-    to_remove = []
-    for node_1 in graph.nodes:
-        if main_path == []:
-            main_path.append(node_1)
-        print(node_1)
-        nodes_predecessor = list(graph.predecessors(node_1))
-        print(len(nodes_predecessor))
-        
-        if len(nodes_predecessor) > 1:
-            print(node_1, "---", nodes_predecessor)
-            while len(nodes_predecessor) > 1:
-                for node_p in nodes_predecessor:
-                    if node_p != node_1:
-                        pointe.append(nodes_predecessor)
-                        print("yess")
-                        nodes_predecessor = list(graph.predecessors(node_p))
-                        print(nodes_predecessor)
-            main_path_weight = path_average_weight(graph, main_path)
-            pointe_weight = path_average_weight(graph, pointe)
-            graph = select_best_path(graph, [main_path, pointe], [len(main_path), len(pointe)], [main_path_weight, pointe_weight])
+
+    flag = True
+    while flag:
+        flag = False
+        main_path = []
+        pointe = []
+        for node_1 in graph.nodes:
+            if main_path == []:
+                main_path.append(node_1)
+            print(node_1)
+            nodes_predecessor = list(graph.predecessors(node_1))
+            print(len(nodes_predecessor))
+            
+            if len(nodes_predecessor) > 1:
+                while len(nodes_predecessor) > 1:
+                    for node_p in nodes_predecessor:
+                        if node_p != node_1:
+                            pointe.append(nodes_predecessor)
+                            print("yess")
+                            nodes_predecessor = list(graph.predecessors(node_p))
+                            print(nodes_predecessor)
+                print(main_path, "--", pointe)
+                main_path_weight = path_average_weight(graph, main_path)
+                print("pointe")
+                pointe_weight = path_average_weight(graph, pointe)
+                
+                graph = select_best_path(graph, [main_path, pointe], [len(main_path), len(pointe)], [main_path_weight, pointe_weight])
+                Flag = True
+                
+            
             
     return graph
 
