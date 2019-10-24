@@ -79,25 +79,74 @@ def path_average_weight(G, chemin):
 
 def remove_paths(graph, list_chemin, delete_entry_node, delete_sink_node):
     list_chemin = list(list_chemin)
-    list_path_clean = []
-    if delete_entry_node == True:
-        start_nodes = list(get_starting_nodes(graph))
-        for chemin in list_chemin:
-            for node in chemin:
+    list_path_clean = []       
+    start_nodes = list(get_starting_nodes(graph))
+    end_nodes = list(get_sink_nodes(graph))
+    for chemin in list_chemin:
+        for node in chemin:
+            if delete_entry_node == True and delete_sink_node == False:
+                print(1, node, start_nodes)
                 if node in start_nodes:
                     graph.remove_node(node)
-                
-    if delete_sink_node == True:
-        end_nodes = list(get_sink_nodes(graph))
-        for chemin in list_chemin:
-            for node in chemin:
+                    print(node,1)
+            if delete_entry_node == False and delete_sink_node == True:
                 if node in end_nodes:
                     graph.remove_node(node)
+            if delete_entry_node == False and delete_sink_node == False:
+                if node not in start_nodes and node not in end_nodes:
+                    graph.remove_node(node)
+            if delete_entry_node == True and delete_sink_node == True:
+                graph.remove_node(node)
     return graph
 
 
-def select_best_path():
-    pass
+def select_best_path(graph, list_chemin, list_size, list_weight, delete_entry_node = False, delete_sink_node = False):
+    #frequent
+    
+    max_weight = []
+    index_weight = []
+    i=0
+    for weight in list_weight:
+        if max_weight == []:
+            max_weight.append(weight)
+            index_weight.append(i)
+        else:
+            print(weight, "--")
+            if weight > max_weight[0]:
+                max_weight = []
+                index_weight = [] 
+                max_weight.append(weight)
+                index_weight.append(i)
+            elif weight == max_weight[0]:
+                max_weight.append(weight)
+                index_weight.append(i)
+        i +=1
+    best_chemin = list_chemin[index_weight[0]]
+    max_size = []
+    index_size = []   
+    if len(max_weight) > 1:
+
+        for index in index_weight:
+            if max_size == []:
+                max_size.append(list_size[index])
+            else:
+                if list_size[index] > max_size[0]:
+                    max_size = []
+                    index_size = [] 
+                    max_size.append(list_size[index])
+                    index_size.append(index)
+                elif list_size[index] == max_size[0]:
+                    max_size.append(list_size[index])
+                    index_size.append(index)
+        best_chemin = list_chemin[index_size[0]]
+        print("sup à 1")
+    if len(max_size) > 1:
+        best_chemin = list_chemin[index_size[randint(0,len(max_size))]]
+    for chemin in list_chemin:
+        if chemin not in best_chemin:
+            remove_paths(graph, chemin, delete_entry_node, delete_sink_node)
+    print(max_weight, index_weight)
+    return graph
 
 def fill(text, width=80):
     """Split text with a line return to respect fasta format"""
@@ -172,17 +221,9 @@ def main():
     #path_average_weight(G,)
     
     graph_1 = nx.DiGraph()
-    graph_2 = nx.DiGraph()
-    graph_3 = nx.DiGraph()
-    graph_4 = nx.DiGraph()
     graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-    graph_2.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-    graph_3.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-    graph_4.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-    graph_1 = remove_paths(graph_1, [(1,2)], True, False)
-    graph_2 = remove_paths(graph_2, [(5,7)], False, True)
-    graph_3 = remove_paths(graph_3, [(2,4,5)], False, False)
-    graph_4 = remove_paths(graph_4, [(2,4,5)], True, True)
+    graph_1 = select_best_path(graph_1, [[1,2], [3,2]], [1, 1], [5, 10], delete_entry_node=True)
+
 
 
 if __name__ == "__main__":
