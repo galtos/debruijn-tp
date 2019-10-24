@@ -210,10 +210,30 @@ def simplify_bubbles(graph):
 
 
 def solve_entry_tips(graph, node_entry):
-    for node_1 in node_entry:
+    main_path = []
+    pointe = []
+    to_remove = []
+    for node_1 in graph.nodes:
+        if main_path == []:
+            main_path.append(node_1)
+        print(node_1)
         nodes_predecessor = list(graph.predecessors(node_1))
+        print(len(nodes_predecessor))
+        
         if len(nodes_predecessor) > 1:
-    pass
+            print(node_1, "---", nodes_predecessor)
+            while len(nodes_predecessor) > 1:
+                for node_p in nodes_predecessor:
+                    if node_p != node_1:
+                        pointe.append(nodes_predecessor)
+                        print("yess")
+                        nodes_predecessor = list(graph.predecessors(node_p))
+                        print(nodes_predecessor)
+            main_path_weight = path_average_weight(graph, main_path)
+            pointe_weight = path_average_weight(graph, pointe)
+            graph = select_best_path(graph, [main_path, pointe], [len(main_path), len(pointe)], [main_path_weight, pointe_weight])
+            
+    return graph
 
 
 def solve_out_tips():
@@ -243,19 +263,17 @@ def main():
     save_contigs(contigs, "test.txt")
     #path_average_weight(G,)
     graph_1 = nx.DiGraph()
-    graph_1.add_weighted_edges_from([(3, 2, 10), (2, 4, 15), (4, 5, 15),
-                                     (2, 10,10), (10, 5,10), (2, 8, 3),
-                                     (8, 9, 3), (9, 5, 3), (5, 6, 10),
-                                     (5, 7, 10)])
-    graph_1 = simplify_bubbles(graph_1)
-    
-    assert (2,8) not in graph_1.edges()
-    assert (8,9) not in graph_1.edges()
-    """
-    assert (9,5) not in graph_1.edges()
-    assert (2,10) not in graph_1.edges()
-    assert (10, 5) not in graph_1.edges()
-    """
+    graph_1.add_weighted_edges_from([(1, 2, 10), (3, 2, 2), (2, 4, 15), (4, 5, 15)])
+    graph_1 = solve_entry_tips(graph_1, [1, 3])  
+    assert (3, 2) not in graph_1.edges()
+    assert (1, 2) in graph_1.edges()
+    graph_2 = nx.DiGraph()
+    graph_2.add_weighted_edges_from([(1, 2, 2), (6, 3, 2), (3, 2, 2),
+                                     (2, 4, 15), (4, 5, 15)])
+    graph_2 = solve_entry_tips(graph_2, [1, 6])  
+    assert (1, 2) not in graph_2.edges()
+    assert (6, 3) in graph_2.edges()
+    assert (3, 2) in graph_2.edges()
 
 if __name__ == "__main__":
     main()
