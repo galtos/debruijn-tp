@@ -178,7 +178,8 @@ def get_contigs(G, start_nodes, end_nodes):
 
 def solve_bubble(graph, node_ancestor, node_descendant):
     all_path = list(nx.all_simple_paths(graph, node_ancestor, node_descendant))
-    print(list(all_path))
+    if all_path == []:
+        return graph
     list_size = []
     list_weight = []
     for i in range(len(all_path)):
@@ -191,25 +192,27 @@ def solve_bubble(graph, node_ancestor, node_descendant):
 
 def simplify_bubbles(graph):
     print(graph.nodes)
+    
     for node_1 in graph.nodes:
-        nodes_ancestor = list(nx.ancestors(graph, node_1))
+        nodes_ancestor = list(graph.predecessors(node_1))
+        print(nodes_ancestor,"------", node_1)
         if len(nodes_ancestor) > 1:
             for i in range(len(nodes_ancestor)-1):
                 for j in range(i+1, len(nodes_ancestor)):
                     path = nx.lowest_common_ancestor(graph, nodes_ancestor[i], nodes_ancestor[j])
+                    
+                    print("ooo", path, nodes_ancestor[i], nodes_ancestor[j])
                     if path != nodes_ancestor[i] and path != nodes_ancestor[j]:
-                        print("yes")
-                        graph = solve_bubble(graph, node_1, path)
-                        print(path)
-        #path = list(nx.lowest_common_ancestor(graph, node_1, node_2))
-        print(nodes_ancestor)
-    
-    #lowest common ancestor
-    #lowest_common_ancestor()
+                        graph = solve_bubble(graph, path, node_1)
+                        print(graph.nodes)
+                        return graph
     return graph
 
 
-def solve_entry_tips():
+def solve_entry_tips(graph, node_entry):
+    for node_1 in node_entry:
+        nodes_predecessor = list(graph.predecessors(node_1))
+        if len(nodes_predecessor) > 1:
     pass
 
 
@@ -245,9 +248,10 @@ def main():
                                      (8, 9, 3), (9, 5, 3), (5, 6, 10),
                                      (5, 7, 10)])
     graph_1 = simplify_bubbles(graph_1)
-    """
+    
     assert (2,8) not in graph_1.edges()
     assert (8,9) not in graph_1.edges()
+    """
     assert (9,5) not in graph_1.edges()
     assert (2,10) not in graph_1.edges()
     assert (10, 5) not in graph_1.edges()
