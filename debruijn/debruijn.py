@@ -212,7 +212,6 @@ def simplify_bubbles(graph):
 def solve_entry_tips(graph, node_entry):
     main_path = []
     pointe = []
-
     flag = True
     while flag:
         flag = False
@@ -221,33 +220,55 @@ def solve_entry_tips(graph, node_entry):
         for node_1 in graph.nodes:
             if main_path == []:
                 main_path.append(node_1)
-            print(node_1)
-            nodes_predecessor = list(graph.predecessors(node_1))
-            print(len(nodes_predecessor))
-            
-            if len(nodes_predecessor) > 1:
-                while len(nodes_predecessor) > 1:
-                    for node_p in nodes_predecessor:
-                        if node_p != node_1:
-                            pointe.append(nodes_predecessor)
-                            print("yess")
-                            nodes_predecessor = list(graph.predecessors(node_p))
-                            print(nodes_predecessor)
-                print(main_path, "--", pointe)
-                main_path_weight = path_average_weight(graph, main_path)
-                print("pointe")
-                pointe_weight = path_average_weight(graph, pointe)
-                
-                graph = select_best_path(graph, [main_path, pointe], [len(main_path), len(pointe)], [main_path_weight, pointe_weight])
-                Flag = True
-                
-            
-            
+            elif len(main_path) == 1:
+                main_path.append(node_1)
+            if len(main_path) >= 2:
+                nodes_predecessor = list(graph.predecessors(node_1))
+                if len(nodes_predecessor) > 1:
+                    pointe.append(node_1)
+                    while nodes_predecessor != []:
+                        for node_p in nodes_predecessor:
+                            if node_p not in main_path:
+                                pointe.append(node_p)
+                                nodes_predecessor = list(graph.predecessors(node_p))
+
+                    main_path_weight = path_average_weight(graph, main_path)
+                    pointe_weight = path_average_weight(graph, pointe[::-1])
+                    graph = select_best_path(graph, [main_path, pointe[::-1]], [len(main_path), len(pointe)], [main_path_weight, pointe_weight], delete_entry_node = True)
+                    Flag = True
+                    break
     return graph
 
 
 def solve_out_tips():
-    pass
+    main_path = []
+    pointe = []
+    flag = True
+    while flag:
+        flag = False
+        main_path = []
+        pointe = []
+        for node_1 in graph.nodes:
+            if main_path == []:
+                main_path.append(node_1)
+            elif len(main_path) == 1:
+                main_path.append(node_1)
+            if len(main_path) >= 2:
+                nodes_predecessor = list(graph.predecessors(node_1))
+                if len(nodes_predecessor) > 1:
+                    pointe.append(node_1)
+                    while nodes_predecessor != []:
+                        for node_p in nodes_predecessor:
+                            if node_p not in main_path:
+                                pointe.append(node_p)
+                                nodes_predecessor = list(graph.predecessors(node_p))
+
+                    main_path_weight = path_average_weight(graph, main_path)
+                    pointe_weight = path_average_weight(graph, pointe[::-1])
+                    graph = select_best_path(graph, [main_path, pointe[::-1]], [len(main_path), len(pointe)], [main_path_weight, pointe_weight], delete_entry_node = True)
+                    Flag = True
+                    break
+    return graph
     
 def main():
     """
@@ -272,6 +293,7 @@ def main():
     contigs = get_contigs(G, sart_nodes, end_nodes)
     save_contigs(contigs, "test.txt")
     #path_average_weight(G,)
+    
     graph_1 = nx.DiGraph()
     graph_1.add_weighted_edges_from([(1, 2, 10), (3, 2, 2), (2, 4, 15), (4, 5, 15)])
     graph_1 = solve_entry_tips(graph_1, [1, 3])  
