@@ -78,31 +78,20 @@ def path_average_weight(G, chemin):
 
 
 def remove_paths(graph, list_chemin, delete_entry_node, delete_sink_node):
-    list_chemin = list(list_chemin)
-    list_path_clean = []       
-    start_nodes = list(get_starting_nodes(graph))
-    end_nodes = list(get_sink_nodes(graph))
+    list_path_clean = []     
     for chemin in list_chemin:
-        for node in chemin:
-            if delete_entry_node == True and delete_sink_node == False:
-                print(1, node, start_nodes)
-                if node in start_nodes:
-                    graph.remove_node(node)
-                    print(node,1)
-            if delete_entry_node == False and delete_sink_node == True:
-                if node in end_nodes:
-                    graph.remove_node(node)
-            if delete_entry_node == False and delete_sink_node == False:
-                if node not in start_nodes and node not in end_nodes:
-                    graph.remove_node(node)
-            if delete_entry_node == True and delete_sink_node == True:
-                graph.remove_node(node)
+        for i in range(1,len(chemin)-1):
+            graph.remove_node(chemin[i])
+        if delete_entry_node == True:
+            graph.remove_node(chemin[0])
+        if delete_sink_node == True:   
+            graph.remove_node(chemin[-1])   
+             
     return graph
 
 
 def select_best_path(graph, list_chemin, list_size, list_weight, delete_entry_node = False, delete_sink_node = False):
-    #frequent
-    
+
     max_weight = []
     index_weight = []
     i=0
@@ -111,7 +100,7 @@ def select_best_path(graph, list_chemin, list_size, list_weight, delete_entry_no
             max_weight.append(weight)
             index_weight.append(i)
         else:
-            print(weight, "--")
+
             if weight > max_weight[0]:
                 max_weight = []
                 index_weight = [] 
@@ -122,8 +111,10 @@ def select_best_path(graph, list_chemin, list_size, list_weight, delete_entry_no
                 index_weight.append(i)
         i +=1
     best_chemin = list_chemin[index_weight[0]]
+
     max_size = []
-    index_size = []   
+    index_size = [] 
+
     if len(max_weight) > 1:
 
         for index in index_weight:
@@ -142,10 +133,14 @@ def select_best_path(graph, list_chemin, list_size, list_weight, delete_entry_no
         print("sup à 1")
     if len(max_size) > 1:
         best_chemin = list_chemin[index_size[randint(0,len(max_size))]]
+
+    print(best_chemin)
     for chemin in list_chemin:
-        if chemin not in best_chemin:
-            remove_paths(graph, chemin, delete_entry_node, delete_sink_node)
-    print(max_weight, index_weight)
+        if chemin != best_chemin:
+            print(chemin, delete_sink_node, delete_entry_node)
+            remove_paths(graph, [chemin], delete_entry_node, delete_sink_node)
+
+    print(graph.nodes())
     return graph
 
 def fill(text, width=80):
@@ -181,12 +176,23 @@ def get_contigs(G, start_nodes, end_nodes):
     return contigs
 
 
-def solve_bubble():
-    pass
+def solve_bubble(graph, node_ancestor, node_descendant):
+    all_path = list(nx.all_simple_paths(graph, node_ancestor, node_descendant))
+    print(list(all_path))
+    list_size = []
+    list_weight = []
+    for i in range(len(all_path)):
+        list_size.append(len(all_path[i]))
+        list_weight.append(path_average_weight(graph, all_path[i]))
+        
+    graph = select_best_path(graph, all_path, list_size, list_weight, delete_entry_node = False, delete_sink_node = False)
+    return graph
 
 
-def simplify_bubbles():
-    pass
+def simplify_bubbles(graph):
+    all_path = list(nx.all_simple_paths(graph))
+    print(all_path)
+    return graph
 
 
 def solve_entry_tips():
@@ -219,12 +225,19 @@ def main():
     contigs = get_contigs(G, sart_nodes, end_nodes)
     save_contigs(contigs, "test.txt")
     #path_average_weight(G,)
-    
     graph_1 = nx.DiGraph()
-    graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-    graph_1 = select_best_path(graph_1, [[1,2], [3,2]], [1, 1], [5, 10], delete_entry_node=True)
-
-
+    graph_1.add_weighted_edges_from([(3, 2, 10), (2, 4, 15), (4, 5, 15),
+                                     (2, 10,10), (10, 5,10), (2, 8, 3),
+                                     (8, 9, 3), (9, 5, 3), (5, 6, 10),
+                                     (5, 7, 10)])
+    graph_1 = simplify_bubbles(graph_1)
+    """
+    assert (2,8) not in graph_1.edges()
+    assert (8,9) not in graph_1.edges()
+    assert (9,5) not in graph_1.edges()
+    assert (2,10) not in graph_1.edges()
+    assert (10, 5) not in graph_1.edges()
+    """
 
 if __name__ == "__main__":
     main()
